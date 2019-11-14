@@ -1,9 +1,13 @@
 package diamants;
 
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+
 class Serveur {
 
 	private ArrayList<GestionClient> alGestionClient;
-	private ArrayList<GestionTable>  alGestionTable;
+	private ArrayList<GestionTable> alGestionTable;
 
 	Serveur(){
 		try{
@@ -14,7 +18,7 @@ class Serveur {
 				// attendre patiemment un client
 				Socket toClient  = serverSocket.accept();
 				// créer un GestionClient pour traiter ce nouveau client
-				GestionClient gdt = new GestionClient(s, this);
+				GestionClient gdc = new GestionClient(toClient, this);
 				alGestionClient.add(gdc);
 				// mettre ce gérant de client dans une Thread
 				Thread tgdc =  new Thread(gdc);
@@ -26,7 +30,7 @@ class Serveur {
 
 
 	void nouvelleTable(GestionClient gc){
-		alGestionTable.add(new GestionTable());
+		alGestionTable.add(new GestionTable(gc, this));
 	}
 
 	ArrayList<GestionTable> getTables(){

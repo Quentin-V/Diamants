@@ -22,10 +22,9 @@ abstract class InitialiserPioche {
 
 		String[] typesDangers = new String[] {"Feu", "Momie", "Rochers", "Serpents", "Araignees"}; // Type de cartes danger
 
-		for(String danger : typesDangers) { // Ajout des cartes danger
+		for(String danger : typesDangers)  // Ajout des cartes danger
 			for(int i = 0; i < 3; i++) // Ajout 3 cartes de chaque danger
 				piocheRetour.add(new CarteDanger(danger));
-		}
 
 		for(int i = 0; i < 5; i++) // Ajout des artefacts
 			piocheRetour.add(new CarteArtefacat());
