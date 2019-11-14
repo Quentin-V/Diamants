@@ -1,0 +1,5 @@
+package diamants;
+
+class Client {
+
+}
