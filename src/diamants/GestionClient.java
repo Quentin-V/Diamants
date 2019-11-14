@@ -2,38 +2,86 @@ package diamants;
 
 class GestionClient implements Runnable{
 
-  private BufferedReader in;
-  private PrintWriter    out;
-  private String name;
+	private BufferedReader in;
+	private PrintWriter    out;
+	private String name;
 
-  private ServeurSimple ss;
+	private Serveur serv;
 
 
-  GerantDeClient(Socket s, ServeurSimple ss){
-    this.ss = ss;
-    try{
-      out = new PrintWriter(s.getOutputStream(), true);
-      in  = new BufferedReader( new InputStreamReader(s.getInputStream()) );
-    }catch(Exception e){}
-  }
+	GerantDeClient(Socket s, Serveur serv){
+		this.serv = serv;
+		try{
+			out = new PrintWriter(s.getOutputStream(), true);
+			in  = new BufferedReader( new InputStreamReader(s.getInputStream()) );
+		}catch(Exception e){}
+		}
 
-  public void run(){
 
-    System.out.println("Un nouveau client s'est connecte");
-    try{
-      out.println("Bienvenue sur le serveur de Pierre");
-      out.println("Quel est votre nom ?");
-      name = in.readLine();
-      System.out.println("Son nom est : " + name);
+		public void run(){
+			out.println("Voulez-vous créer une nouvelle table ?");
+			String reponse;
+			if(!serv.tableLibre()) {
+				out.println("Aucun table n'existe, vous êtes donc sur une nouvelle table.");
+				serv.nouvelleTable(this);
+			}else {
+				reponse = attendreReponse(new String[] {"oui", "non"});
+				if(reponse.equalsIgnoreCase("Oui")){
+					serv.nouvelleTable(this);
+				}else{
+					afficherTable();
+					ArrayList<String> nomTables = new ArrayList<>();
+					for(GestionTable gt : serv.getTables())
+						if(gt.getGcs().size()<8)
+							nomTables.add(gt.getNom());
+					reponse = attendreReponse(nomTable.toArray());
+				}
+			}
 
-      String message = "";
-      while(!message.equalsIgnoreCase("quitter")){
-        message = in.readLine();
-        if(!message.equalsIgnoreCase("quitter") && !message.equalsIgnoreCase(""))
-          ss.giveMessage(name, message);
-      }
-    }catch(Exception e){}
+		}
 
-    fin();
-  }
+		private String attendreReponse(){
+			String rep = null;
+
+			while(rep == null){
+				try{
+					rep = in.readLine();
+				}catch(IOException ignored){}
+			}
+			return rep;
+		}
+
+		private String attendreReponse(String[] attendu){
+			String rep = null;
+
+			while(rep == null){
+				try{
+					rep = in.readLine();
+					if(!contient(attendu, rep)) {
+						rep = null;
+						throw new IllegalArgumentException();
+					}
+				}catch(IllegalArgumentException iae) {
+					String envoiException = "Votre réponse doit être parmi les suivantes : ";
+					for(String r : attendu) envoiException += r + ", ";
+					envoiException = envoiException.substring(0, envoiException.length()-3);
+					out.println(envoiException);
+				}catch(IOException ignored){}
+			}
+			return rep;
+		}
+
+		private boolean contient(String[] attendu, String s) {
+			for(String att : attendu) {
+				if(att.equalsIgnoreCase(s)) return true;
+			}
+			return false;
+		}
+
+		private void afficherTable(){
+			for(GestionTable gt : serv.getTables()){
+				gt.getNom();
+			}
+		}
+	}
 }
