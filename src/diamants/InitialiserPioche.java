@@ -23,13 +23,19 @@ abstract class InitialiserPioche {
 		for(int i = 0; i < 5; i++)
 			piocheRetour.add(new CarteArtefacat());
 
+		piocheRetour = melanger(piocheRetour);
+
 		return piocheRetour;
 	}
 
-	private ArrayList<Carte> melanger(ArrayList<Carte> alC) {
-		ArrayList<Carte> pioche = alC;
+	private ArrayList<Carte> melanger(ArrayList<Carte> pioche) {
+		ArrayList<Carte> piocheMelangee = new ArrayList<>();
 
-		return alC;
+		for(int i = 0; i < pioche.size(); i++) {
+			piocheMelangee.add(pioche.remove((int) (Math.random() * pioche.size())));
+		}
+
+		return piocheMelangee;
 	}
 
 }
