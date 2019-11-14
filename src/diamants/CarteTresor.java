@@ -7,4 +7,9 @@ class CarteTresor extends Carte {
 		super("Tresor");
 		this.nbDiamants = nbDiamants;
 	}
+
+	@Override
+	public String toString() {
+		return this.nbDiamants + " diamants";
+	}
 }

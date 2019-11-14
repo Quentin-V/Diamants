@@ -7,4 +7,9 @@ class CarteDanger extends Carte {
 		super("Danger");
 		this.danger = danger;
 	}
+
+	@Override
+	public String toString() {
+		return this.danger;
+	}
 }
