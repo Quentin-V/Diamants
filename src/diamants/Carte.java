@@ -8,8 +8,8 @@ class Carte {
 		this.type = type;
 	}
 
-	Carte() {
-		this.type = null;
+	public String toString() {
+		return this.type;
 	}
 
 }
