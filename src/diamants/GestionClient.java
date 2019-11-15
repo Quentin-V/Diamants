@@ -27,14 +27,18 @@ class GestionClient implements Runnable {
 
 	public void run(){
 		out.println("Voulez-vous créer une nouvelle table ?");
-		String reponse;
+		String reponse, nomTable;
 		if(!serv.tableLibre()) {
-			out.println("Aucun table n'existe, vous êtes donc sur une nouvelle table.");
-			serv.nouvelleTable(this);
+			out.print("Aucun table n'existe, vous êtes donc sur une nouvelle table." +
+					  "\nDonner un nom a cette table : ");
+			reponse = attendreReponse();
+			serv.nouvelleTable(this, reponse);
 		}else {
 			reponse = attendreReponse(new String[] {"oui", "non"});
 			if(reponse.equalsIgnoreCase("Oui")){
-				serv.nouvelleTable(this);
+				out.print("Choisissez le nom de votre table : ");
+				nomTable = attendreReponse();
+				serv.nouvelleTable(this, nomTable);
 			}else{
 				afficherTable();
 				ArrayList<String> nomTables = new ArrayList<>();
@@ -42,11 +46,14 @@ class GestionClient implements Runnable {
 					if(gt.getGcs().size()<8)
 						nomTables.add(gt.getNom());
 				reponse = attendreReponse((String[]) nomTables.toArray());
+				for(GestionTable gt : serv.getTables())
+					if(gt.getNom().equalsIgnoreCase(reponse))
+						gt.ajouterGc(this);
 			}
 		}
 	}
 
-	private String attendreReponse(){
+	String attendreReponse(){
 		String rep = null;
 
 		while(rep == null){
@@ -57,7 +64,7 @@ class GestionClient implements Runnable {
 		return rep;
 	}
 
-	private String attendreReponse(String[] attendu){
+	String attendreReponse(String[] attendu){
 		String rep = null;
 
 		while(rep == null){
@@ -75,6 +82,13 @@ class GestionClient implements Runnable {
 			}catch(IOException ignored){}
 		}
 		return rep;
+	}
+
+	void ecrire(String message, boolean retourLigne){
+		if(retourLigne)
+			out.println(message);
+		else
+			out.print(message);
 	}
 
 	private boolean contient(String[] attendu, String s) {

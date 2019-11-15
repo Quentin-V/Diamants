@@ -24,13 +24,15 @@ class Serveur {
 				Thread tgdc =  new Thread(gdc);
 				// lancer la thread qui gérera ce client
 				tgdc.start();
+				//Le client ce déconnecte
+				fin();
 			}
 		}catch(Exception e){System.out.println("Client pas cool");}
 	}
 
 
-	void nouvelleTable(GestionClient gc){
-		alGestionTable.add(new GestionTable(gc, this));
+	void nouvelleTable(GestionClient gc, String nomTable){
+		alGestionTable.add(new GestionTable(gc, this, nomTable));
 	}
 
 	ArrayList<GestionTable> getTables(){
@@ -43,5 +45,7 @@ class Serveur {
 				return true;
 		return false;
 	}
+
+	void fin(){}
 
 }
