@@ -85,7 +85,7 @@ class GestionClient implements Runnable {
 			}catch(IllegalArgumentException iae) {
 				String envoiException = "Votre réponse doit être parmi les suivantes : ";
 				for(String r : attendu) envoiException += r + ", ";
-				envoiException = envoiException.substring(0, envoiException.length()-3);
+				envoiException = envoiException.substring(0, envoiException.length()-2);
 				out.println(envoiException);
 			}catch(IOException ignored){}
 		}
