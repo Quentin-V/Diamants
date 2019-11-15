@@ -15,6 +15,7 @@ class GestionClient implements Runnable {
 	private String  name;
 	private int     nbDiamants;
 	boolean quittez;
+	boolean quittezPlusTours;
 
 	private Serveur serv;
 
@@ -22,6 +23,7 @@ class GestionClient implements Runnable {
 	GestionClient(Socket s, Serveur serv){
 		this.serv = serv;
 		quittez = false;
+		quittezPlusTours = false;
 		try{
 			out = new PrintWriter(s.getOutputStream(), true);
 			in  = new BufferedReader( new InputStreamReader(s.getInputStream()) );
@@ -33,7 +35,7 @@ class GestionClient implements Runnable {
 		out.println("Voulez-vous créer une nouvelle table ?");
 		String reponse, nomTable;
 		if(!serv.tableLibre()) {
-			out.print("Aucun table n'existe, vous êtes donc sur une nouvelle table." +
+			out.println("Aucun table n'existe, vous êtes donc sur une nouvelle table." +
 					  "\nDonner un nom a cette table : ");
 			reponse = attendreReponse();
 			serv.nouvelleTable(this, reponse);
@@ -49,7 +51,9 @@ class GestionClient implements Runnable {
 				for(GestionTable gt : serv.getTables())
 					if(gt.getGcs().size()<8)
 						nomTables.add(gt.getNom());
-				reponse = attendreReponse((String[]) nomTables.toArray());
+				String[] tabTables = new String[nomTables.size()];
+				nomTables.toArray(tabTables);
+				reponse = attendreReponse(tabTables);
 				for(GestionTable gt : serv.getTables())
 					if(gt.getNom().equalsIgnoreCase(reponse))
 						gt.ajouterGc(this);
@@ -102,6 +106,10 @@ class GestionClient implements Runnable {
     void quittez() {
         quittez = true;
     }
+	
+	void quittezPlusTours() {
+		quittezPlusTours = true;
+	}
 
     void nouvellePartie(){
 	    quittez = false;
@@ -110,7 +118,9 @@ class GestionClient implements Runnable {
 
     void nouvelleManche(){
 	    quittez = false;
+		quittezPlusTours = false;
     }
+	
 	private boolean contient(String[] attendu, String s) {
 		for(String att : attendu) {
 			if(att.equalsIgnoreCase(s)) return true;
@@ -124,6 +134,10 @@ class GestionClient implements Runnable {
 			affichage.append("\t").append(gt.getNom());
 		}
 		out.println(affichage);
+	}
+	
+	int diamants() {
+		return nbDiamants;
 	}
 
 }
