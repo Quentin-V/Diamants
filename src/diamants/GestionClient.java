@@ -11,13 +11,17 @@ class GestionClient implements Runnable {
 
 	private BufferedReader in;
 	private PrintWriter out;
-	private String name;
+
+	private String  name;
+	private int     nbDiamants;
+	boolean quittez;
 
 	private Serveur serv;
 
 
 	GestionClient(Socket s, Serveur serv){
 		this.serv = serv;
+		quittez = false;
 		try{
 			out = new PrintWriter(s.getOutputStream(), true);
 			in  = new BufferedReader( new InputStreamReader(s.getInputStream()) );
@@ -91,6 +95,22 @@ class GestionClient implements Runnable {
 			out.print(message);
 	}
 
+	void ajouterDiamants(int nbDiamants){
+	    this.nbDiamants += nbDiamants;
+    }
+
+    void quittez() {
+        quittez = true;
+    }
+
+    void nouvellePartie(){
+	    quittez = false;
+	    nbDiamants = 0;
+    }
+
+    void nouvelleManche(){
+	    quittez = false;
+    }
 	private boolean contient(String[] attendu, String s) {
 		for(String att : attendu) {
 			if(att.equalsIgnoreCase(s)) return true;
@@ -105,4 +125,5 @@ class GestionClient implements Runnable {
 		}
 		out.println(affichage);
 	}
+
 }

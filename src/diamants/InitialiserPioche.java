@@ -27,7 +27,7 @@ abstract class InitialiserPioche {
 				piocheRetour.add(new CarteDanger(danger));
 
 		for(int i = 0; i < 5; i++) // Ajout des artefacts
-			piocheRetour.add(new CarteArtefacat());
+			piocheRetour.add(new CarteArtefact());
 
 		piocheRetour = melanger(piocheRetour); // Mélange de la pioche
 

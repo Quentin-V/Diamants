@@ -32,7 +32,7 @@ class Serveur {
 
 
 	void nouvelleTable(GestionClient gc, String nomTable){
-		alGestionTable.add(new GestionTable(gc, this, nomTable));
+		alGestionTable.add(new GestionTable(gc, nomTable));
 	}
 
 	ArrayList<GestionTable> getTables(){

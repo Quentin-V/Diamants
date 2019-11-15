@@ -15,7 +15,7 @@ class Client {
 	private PrintWriter		out;
 
 	/**
-	 * @param la socket du client
+	 * @param s
 	 */
 	public Client(Socket s) {
 		this.pochetTmp		= 0;
@@ -46,7 +46,7 @@ class Client {
 				break;
 		}
 
-		return this.sortit;
+		return "" + this.sortit;
 	}
 
 
@@ -57,20 +57,14 @@ class Client {
 	 */
 	private String demande(String[] repPossible, String question) {
 		String rep = "";
-		try
-		{
-			boolean sortBoucle = false;
-			while(!sortBoucle) {
-				this.out.println(question);
-				rep = this.in.read();
-				for (int i = 0; i < repPossible.length; i++)
-					if (rep.equals(repPossible[i])) {
-						sortBoucle = true;
-					}
-			}
-		}
-		catch (IOException e){
-			System.out.println(ie);
+		boolean sortBoucle = false;
+		while(!sortBoucle) {
+			this.out.println(question);
+			//rep = this.in.read();
+			for (int i = 0; i < repPossible.length; i++)
+				if (rep.equals(repPossible[i])) {
+					sortBoucle = true;
+				}
 		}
 		return rep;
 	}
@@ -97,14 +91,14 @@ class Client {
 	}
 
 	/**
-	 * @param nombre de rubis que le joueur vient de recolter
+	 * @param nbRubis
 	 */
 	void ajouterRubis(int nbRubis) {
 		this.pochetTmp += nbRubis;
 	}
 
 	/**
-	 * @param nombre de diamants que le joueur vient de recoltes
+	 * @param nbDiamants
 	 */
 	void ajouterDiamants(int nbDiamants) {
 		this.pochetTmp += (nbDiamants * 5);
