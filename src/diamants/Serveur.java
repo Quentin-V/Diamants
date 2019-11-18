@@ -27,7 +27,7 @@ class Serveur {
 				//Le client ce déconnecte
 				fin();
 			}
-		}catch(Exception e){System.out.println("Client pas cool");}
+		}catch(Exception e){System.out.println("Client pas cool"); e.printStackTrace();}
 	}
 
 
@@ -47,5 +47,9 @@ class Serveur {
 	}
 
 	void fin(){}
+
+	public static void main(String[] args) { // TEST TODO
+		new Serveur();
+	}
 
 }

@@ -9,12 +9,12 @@ import java.util.ArrayList;
 
 class GestionClient implements Runnable {
 
-	private BufferedReader in;
-	private PrintWriter out;
+	BufferedReader in;
+	PrintWriter out;
 
 	private String  name;
 	private int     nbDiamants;
-	boolean quittez;
+	boolean quitter;
 	boolean quittezPlusTours;
 
 	private Serveur serv;
@@ -22,7 +22,7 @@ class GestionClient implements Runnable {
 
 	GestionClient(Socket s, Serveur serv){
 		this.serv = serv;
-		quittez = false;
+		quitter = false;
 		quittezPlusTours = false;
 		try{
 			out = new PrintWriter(s.getOutputStream(), true);
@@ -32,7 +32,6 @@ class GestionClient implements Runnable {
 
 
 	public void run(){
-		out.println("Voulez-vous créer une nouvelle table ?");
 		String reponse, nomTable;
 		if(!serv.tableLibre()) {
 			out.println("Aucun table n'existe, vous êtes donc sur une nouvelle table." +
@@ -40,6 +39,7 @@ class GestionClient implements Runnable {
 			reponse = attendreReponse();
 			serv.nouvelleTable(this, reponse);
 		}else {
+			out.println("Voulez-vous créer une nouvelle table ?");
 			reponse = attendreReponse(new String[] {"oui", "non"});
 			if(reponse.equalsIgnoreCase("Oui")){
 				out.print("Choisissez le nom de votre table : ");
@@ -55,7 +55,7 @@ class GestionClient implements Runnable {
 				nomTables.toArray(tabTables);
 				reponse = attendreReponse(tabTables);
 				for(GestionTable gt : serv.getTables())
-					if(gt.getNom().equalsIgnoreCase(reponse))
+					if(gt.getNom().equalsIgnoreCase(reponse) && !gt.tableLancer)
 						gt.ajouterGc(this);
 			}
 		}
@@ -103,8 +103,8 @@ class GestionClient implements Runnable {
 	    this.nbDiamants += nbDiamants;
     }
 
-    void quittez() {
-        quittez = true;
+    void quitter() {
+        quitter = true;
     }
 	
 	void quittezPlusTours() {
@@ -112,12 +112,12 @@ class GestionClient implements Runnable {
 	}
 
     void nouvellePartie(){
-	    quittez = false;
+	    quitter = false;
 	    nbDiamants = 0;
     }
 
     void nouvelleManche(){
-	    quittez = false;
+	    quitter = false;
 		quittezPlusTours = false;
     }
 	
@@ -131,7 +131,7 @@ class GestionClient implements Runnable {
 	private void afficherTable() {
 		StringBuilder affichage = new StringBuilder("Sélectionner la table : \n");
 		for (GestionTable gt : serv.getTables()) {
-			affichage.append("\t").append(gt.getNom());
+			if(!gt.tableLancer) affichage.append("\t").append(gt.getNom());
 		}
 		out.println(affichage);
 	}

@@ -1,5 +1,6 @@
 package diamants;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 class GestionTable implements Runnable{
@@ -52,7 +53,7 @@ class GestionTable implements Runnable{
               break;
             case "Tresor":
               for (GestionClient gc : gcs)
-                 if(!gc.quittez)
+                 if(!gc.quitter)
 					 stockDiamantsTmp[gcs.indexOf(gc)] += ((CarteTresor) carte).nbDiamants/nbRestant;
               nbDiamantPlateau += ((CarteTresor) carte).nbDiamants % nbRestant;
               break;
@@ -64,19 +65,35 @@ class GestionTable implements Runnable{
 				gc.ecrire("Les cartes en jeu sont : " + listeCartes(plateau), true);
 		  
 		  if(nbRestant != 0) {
+
+		  	System.out.println("Nombre de diamants sur le plateau : " + nbDiamantPlateau);
+
+			  for (GestionClient gc1 : gcs) {
+				  gc1.ecrire("Nombre de diamants en cours : ", true);
+				  for (int u = 0; u<gcs.size();u++)
+					  gc1.ecrire("\t" + u + " : " + stockDiamantsTmp[u], true);
+			  }
+
+			  ArrayList<GestionClient> gcsEnJeu = new ArrayList<>();
 			  for (GestionClient gc : gcs) {
-				if(!gc.quittez) {
-					gc.ecrire("Voulez-vous rester ou quittez ?", true);
-					rep = gc.attendreReponse(new String[]{"rester", "quittez"});
-					if (rep.equalsIgnoreCase("quittez")) {
-					  gc.quittez();
+			    if(!gc.quitter) {
+				    gc.ecrire("Voulez-vous rester ou quitter ?", true);
+				    gcsEnJeu.add(gc);
+			    }
+			  }
+			  ArrayList<Boolean> rester = attendreResterOuQuitter(gcsEnJeu);
+			  System.out.print("RESTER : ");
+			  System.out.println(rester);
+			  for(int j = 0; j < rester.size(); ++j) {
+				  if(!rester.get(j)) {
+					  gcsEnJeu.get(j).quitter();
 					  nbRestant--;
 					  nbQuitteur++;
-					}
-				}
+					  System.out.println("Etat quitter gcgeti : " + gcsEnJeu.get(j).quitter);
+				  }
 			  }
 			  for(GestionClient gc :gcs){
-				if(gc.quittez && !gc.quittezPlusTours){
+				if(gc.quitter && !gc.quittezPlusTours){
 				  gc.ajouterDiamants(stockDiamantsTmp[gcs.indexOf(gc)] + nbDiamantPlateau/nbQuitteur);
 				  stockDiamantsTmp[gcs.indexOf(gc)] = 0;
 				  if(nbQuitteur == 1){
@@ -94,12 +111,8 @@ class GestionTable implements Runnable{
 				if(nbQuitteur != 0)
 					nbDiamantPlateau = nbDiamantPlateau%nbQuitteur;
 			  }
-				  
-			  for (GestionClient gc1 : gcs)
-				  for (int u = 0; u<gcs.size();u++)
-					gc1.ecrire("Le nombre de diamants du joueur " + u + " sur lui est de " + stockDiamantsTmp[u], true);
 			
-			}
+		  }
 		}
 	    for (GestionClient gc1 : gcs)
 		  for (int u = 0; u<gcs.size();u++)
@@ -118,15 +131,37 @@ class GestionTable implements Runnable{
     }
   }
 
-  private void lancerTable(){
-    gcs.get(0).ecrire("Voulez-vous lancez la partie ?", true);
+	private ArrayList<Boolean> attendreResterOuQuitter(ArrayList<GestionClient> gcsEnJeu) {
+  	    ArrayList<Boolean> rester = new ArrayList<>();
+  	    for(int i = 0; i < gcsEnJeu.size(); ++i) {
+  	    	rester.add(null);
+        }
+  	    while(rester.contains(null)) {
+  	    	for(GestionClient gc : gcsEnJeu) {
+		        try {
+			        String reponse = gc.in.readLine();
+			        boolean reste;
+			        if(reponse.equalsIgnoreCase("rester")) {
+			        	reste = true;
+			        }else if(reponse.equalsIgnoreCase("quitter")) {
+			        	reste = false;
+			        }else throw new IllegalArgumentException();
+			        rester.set(gcsEnJeu.indexOf(gc), reste);
+		        } catch (IllegalArgumentException iae) {gc.ecrire("Votre réponse doit être rester ou quitter.", true);}
+		          catch (IOException ignored) {}
+  	    	}
+        }
+  	    return rester;
+	}
+
+	private void lancerTable(){
+    gcs.get(0).ecrire("Ecrivez lancer lorsque vous voulez laner la partie", true);
     String rep = "";
     do{
-      if(rep.equalsIgnoreCase("oui"))
+      if(rep.equalsIgnoreCase("lancer"))
         gcs.get(0).ecrire("Il n'y a pas assez de joueur", true);
-      rep = gcs.get(0).attendreReponse(new String[] {"oui"});
+      rep = gcs.get(0).attendreReponse(new String[] {"lancer"});
     }while(gcs.size() < MINIMUM_JOUEUR);
-
     tableLancer = true;
   }
 
@@ -146,7 +181,16 @@ class GestionTable implements Runnable{
 
   String getNom(){ return nom; }
   ArrayList<GestionClient> getGcs() { return gcs; }
-  void ajouterGc(GestionClient gc){ gcs.add(gc); }
+  void ajouterGc(GestionClient gc) {
+  	gcs.add(gc);
+  	for(GestionClient unGc : gcs) {
+  		if(unGc != gc) {
+  			unGc.ecrire("Un joueur s'est connecté !", true);
+	    }else {
+  			unGc.ecrire("Vous êtes connecté à la table : " + this.nom, true);
+	    }
+    }
+  }
 
 }
 
