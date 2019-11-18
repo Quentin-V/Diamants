@@ -155,7 +155,7 @@ class GestionTable implements Runnable{
 	}
 
 	private void lancerTable(){
-    gcs.get(0).ecrire("Ecrivez lancer lorsque vous voulez laner la partie", true);
+    gcs.get(0).ecrire("Ecrivez lancer lorsque vous voulez lancer la partie", true);
     String rep = "";
     do{
       if(rep.equalsIgnoreCase("lancer"))
