@@ -34,12 +34,14 @@ class GestionClient implements Runnable {
 	public void run(){
 		String reponse, nomTable;
 		if(!serv.tableLibre()) {
-			out.println("Aucun table n'existe, vous êtes donc sur une nouvelle table." +
+			out.print("Aucun table n'existe, vous êtes donc sur une nouvelle table." +
 					  "\nDonner un nom a cette table : ");
+			out.flush();
 			reponse = attendreReponse();
 			serv.nouvelleTable(this, reponse);
 		}else {
-			out.println("Voulez-vous créer une nouvelle table ?");
+			out.print("Voulez-vous créer une nouvelle table ?\nOui ou non : ");
+			out.flush();
 			reponse = attendreReponse(new String[] {"oui", "non"});
 			if(reponse.equalsIgnoreCase("Oui")){
 				out.print("Choisissez le nom de votre table : ");
@@ -97,6 +99,7 @@ class GestionClient implements Runnable {
 			out.println(message);
 		else
 			out.print(message);
+			out.flush();
 	}
 
 	void ajouterDiamants(int nbDiamants){
