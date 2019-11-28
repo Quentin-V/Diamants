@@ -12,18 +12,20 @@ class GestionClient implements Runnable {
 	BufferedReader in;
 	PrintWriter out;
 
-	private String  name;
+	String  name;
 	private int     nbDiamants;
 	boolean quitter;
-	boolean quittezPlusTours;
+	boolean quitterPlusTours;
 
 	private Serveur serv;
-
+	
+	Socket toClient;
 
 	GestionClient(Socket s, Serveur serv){
 		this.serv = serv;
 		quitter = false;
-		quittezPlusTours = false;
+		quitterPlusTours = false;
+		toClient = s;
 		try{
 			out = new PrintWriter(s.getOutputStream(), true);
 			in  = new BufferedReader( new InputStreamReader(s.getInputStream()) );
@@ -33,11 +35,25 @@ class GestionClient implements Runnable {
 
 	public void run(){
 		String reponse, nomTable;
+		boolean dejaExistante = false;
 		if(!serv.tableLibre()) {
 			out.print("Aucun table n'existe, vous êtes donc sur une nouvelle table." +
 					  "\nDonner un nom a cette table : ");
 			out.flush();
 			reponse = attendreReponse();
+			for(GestionTable gt : serv.getTables())
+				if(gt.getNom().equals(reponse))
+					dejaExistante = true;
+			while(dejaExistante) {
+				out.print("Ce nom est déjà utilisé, donner un autre nom a cette table : ");
+				out.flush();
+				reponse = attendreReponse();
+				for(GestionTable gt : serv.getTables())
+					if(gt.getNom().equals(reponse))
+						dejaExistante = true;
+					else
+						dejaExistante = false;
+			}
 			serv.nouvelleTable(this, reponse);
 		}else {
 			out.print("Voulez-vous créer une nouvelle table ?\nOui ou non : ");
@@ -45,7 +61,21 @@ class GestionClient implements Runnable {
 			reponse = attendreReponse(new String[] {"oui", "non"});
 			if(reponse.equalsIgnoreCase("Oui")){
 				out.print("Choisissez le nom de votre table : ");
+				out.flush();
 				nomTable = attendreReponse();
+				for(GestionTable gt : serv.getTables())
+					if(gt.getNom().equals(nomTable))
+						dejaExistante = true;
+				while(dejaExistante) {
+					out.print("Ce nom est déjà utilisé, donner un autre nom a cette table : ");
+					out.flush();
+					nomTable = attendreReponse();
+					for(GestionTable gt : serv.getTables())
+						if(gt.getNom().equals(nomTable))
+							dejaExistante = true;
+						else
+							dejaExistante = false;
+				}
 				serv.nouvelleTable(this, nomTable);
 			}else{
 				afficherTable();
@@ -110,8 +140,8 @@ class GestionClient implements Runnable {
         quitter = true;
     }
 	
-	void quittezPlusTours() {
-		quittezPlusTours = true;
+	void quitterPlusTours() {
+		quitterPlusTours = true;
 	}
 
     void nouvellePartie(){
@@ -121,7 +151,7 @@ class GestionClient implements Runnable {
 
     void nouvelleManche(){
 	    quitter = false;
-		quittezPlusTours = false;
+		quitterPlusTours = false;
     }
 	
 	private boolean contient(String[] attendu, String s) {
