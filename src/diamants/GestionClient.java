@@ -38,34 +38,34 @@ class GestionClient implements Runnable {
 
 	public void run(){
 		String reponse, nomTable;
-		if(!serv.tableLibre()) {
+		if (!serv.tableLibre()) {
 			out.print("Aucun table n'existe, vous êtes donc sur une nouvelle table." +
-					  "\nDonner un nom a cette table : ");
+				   "\nDonner un nom a cette table : ");
 			out.flush();
 			reponse = attendreReponse();
 			serv.nouvelleTable(this, reponse);
-		}else {
-            out.print("Voulez-vous créer une nouvelle table ?\nOui ou non : ");
-            out.flush();
-            reponse = attendreReponse(new String[]{"oui", "non"});
-            if (reponse.equalsIgnoreCase("Oui")) {
-                out.print("Choisissez le nom de votre table : ");
-                nomTable = attendreReponse();
-                serv.nouvelleTable(this, nomTable);
-            } else {
-                afficherTable();
-                ArrayList<String> nomTables = new ArrayList<>();
-                for (GestionTable gt : serv.getTables())
-                    if (gt.getGcs().size() < 8)
-                        nomTables.add(gt.getNom());
-                String[] tabTables = new String[nomTables.size()];
-                nomTables.toArray(tabTables);
-                reponse = attendreReponse(tabTables);
-                for (GestionTable gt : serv.getTables())
-                    if (gt.getNom().equalsIgnoreCase(reponse) && !gt.tableLancer)
-                        gt.ajouterGc(this);
-            }
-        }
+		} else {
+			out.print("Voulez-vous créer une nouvelle table ?\nOui ou non : ");
+			out.flush();
+			reponse = attendreReponse(new String[]{"oui", "non"});
+			if (reponse.equalsIgnoreCase("Oui")) {
+				out.print("Choisissez le nom de votre table : ");
+				nomTable = attendreReponse();
+				serv.nouvelleTable(this, nomTable);
+			} else {
+				afficherTable();
+				ArrayList<String> nomTables = new ArrayList<>();
+				for (GestionTable gt : serv.getTables())
+					if (gt.getGcs().size() < 8)
+						nomTables.add(gt.getNom());
+				String[] tabTables = new String[nomTables.size()];
+				nomTables.toArray(tabTables);
+				reponse = attendreReponse(tabTables);
+				for (GestionTable gt : serv.getTables())
+					if (gt.getNom().equalsIgnoreCase(reponse) && !gt.tableLancer)
+						gt.ajouterGc(this);
+			}
+		}
 	}
 
 	String attendreReponse(){
@@ -86,10 +86,14 @@ class GestionClient implements Runnable {
 		while(rep == null){
 			try{
 				rep = in.readLine();
+				if(rep == null)
+					throw new ClientDecoException();
 				if(!contient(attendu, rep)) {
 					rep = null;
 					throw new IllegalArgumentException();
 				}
+			}catch(ClientDecoException cde) {
+				serv.deconnexion(this);
 			}catch(IllegalArgumentException iae) {
 				String envoiException = "Votre réponse doit être parmi les suivantes : ";
 				for(String r : attendu) envoiException += r + ", ";
@@ -101,11 +105,12 @@ class GestionClient implements Runnable {
 	}
 
 	void ecrire(String message, boolean retourLigne){
-		if(retourLigne)
+		if(retourLigne) {
 			out.println(message);
-		else
+		} else {
 			out.print(message);
 			out.flush();
+		}
 	}
 
 	void ajouterDiamants(int nbDiamants){

@@ -51,4 +51,11 @@ class Serveur {
 		new Serveur();
 	}
 
+	public void ecrire(String test) {
+		System.out.println("Il est parti");
+	}
+
+	public void deconnexion(GestionClient gestionClient) {
+		// TODO
+	}
 }

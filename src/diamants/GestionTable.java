@@ -1,7 +1,11 @@
 package diamants;
 
+import javax.security.sasl.SaslServer;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 
 class GestionTable implements Runnable{
 
@@ -37,10 +41,9 @@ class GestionTable implements Runnable{
 
 			for(int i = 0; i < 5; i++) {
 
-				deconnecte();
-
 				for(GestionClient gc : gcs){
 					System.out.println("Client n°" + gcs.indexOf(gc));
+					deconnecte(gc);
 				}
 
 				plateau = new ArrayList<>();
@@ -86,10 +89,10 @@ class GestionTable implements Runnable{
 
 						ArrayList<GestionClient> gcsEnJeu = new ArrayList<>();
 						for (GestionClient gc : gcs) {
-							if(!gc.quitter && !deconnecte()) {
+							System.out.println("Check deco");
+							if(!gc.quitter & !deconnecte(gc)) {
 								gc.ecrire("Voulez-vous rester ou quitter : ", false);
-								if(!deconnecte())
-    								gcsEnJeu.add(gc);
+								gcsEnJeu.add(gc);
 							}
 						}
 						ArrayList<Boolean> rester = attendreResterOuQuitter(gcsEnJeu);
@@ -139,21 +142,35 @@ class GestionTable implements Runnable{
 		}
 	}
 
-    private boolean deconnecte() {
-		for(GestionClient gc : gcs){
-			//System.out.println("Gc num : " + gcs.indexOf(gc) + "\n\tConnected : " + gc.toClient.isConnected() + "\n\tClosed : " + gc.toClient.isClosed());
-			try {
-				if(!gc.toClient.getInetAddress().isReachable(500)){
-					gcs.remove(gc);
-					messagePourTous(gc.name + " s'est déconnecté", true);
-					return true;
-				}
-			} catch (IOException e) {
+    private boolean deconnecte(GestionClient gc) {
+		/*
+	    System.out.print("LES GCS AVANT DECO : ");
+	    System.out.println(gcs);
+		System.out.println("Gc num : " + gcs.indexOf(gc) + "\n\tConnected : " + gc.toClient.isConnected() + "\n\tClosed : " + gc.toClient.isClosed() + "\n\tInputShutdown : " + gc.toClient.isInputShutdown() + "\n\tOututShutdown : " + gc.toClient.isOutputShutdown());
+		if (!gc.toClient.isConnected()) {
+			gcs.remove(gc);
+			messagePourTous(gc.name + " s'est déconnecté", true);
+			return true;
+		}
+	    System.out.print("LES GCS APRES DECO : ");
+	    System.out.println(gcs);
 
-			}
+		 */
+		try {
+			ObjectOutputStream oos = new ObjectOutputStream(gc.toClient.getOutputStream());
+			oos.writeObject(new Test());
+			oos.flush();
+			oos.close();
+		}catch(Exception e) {
+			System.out.println("IL EST DECO");
+			e.printStackTrace();
 		}
 
 	    return false;
+    }
+
+    private class Test implements Serializable {
+		public Test() {}
     }
 
     private void messagePourTous(String message, boolean retourLigne) {
@@ -187,20 +204,6 @@ class GestionTable implements Runnable{
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-
-			/*
-			for(GestionClient gc : gcsEnJeu) {
-				if(rester.get(gcsEnJeu.indexOf(gc)) != null) continue;
-				System.out.println("Dans le try");
-				String reponse = gc.attendreReponse(new String[] {"rester", "quitter"});
-				boolean reste = true;
-				if(reponse.equalsIgnoreCase("quitter")) {
-					reste = false;
-				}
-				rester.set(gcsEnJeu.indexOf(gc), reste);
-			}
-
-			 */
 		}
 		if(rester.contains(null)) {
 			for(ResterQuitter roq : roqs) {
