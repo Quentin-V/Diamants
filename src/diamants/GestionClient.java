@@ -12,18 +12,23 @@ class GestionClient implements Runnable {
 	BufferedReader in;
 	PrintWriter out;
 
-	private String  name;
-	private int     nbDiamants;
+	String name;
+	private int    nbDiamants;
+
 	boolean quitter;
 	boolean quittezPlusTours;
 
 	private Serveur serv;
+
+	Socket toClient;
 
 
 	GestionClient(Socket s, Serveur serv){
 		this.serv = serv;
 		quitter = false;
 		quittezPlusTours = false;
+		name = "";
+		toClient = s;
 		try{
 			out = new PrintWriter(s.getOutputStream(), true);
 			in  = new BufferedReader( new InputStreamReader(s.getInputStream()) );
@@ -40,36 +45,37 @@ class GestionClient implements Runnable {
 			reponse = attendreReponse();
 			serv.nouvelleTable(this, reponse);
 		}else {
-			out.print("Voulez-vous créer une nouvelle table ?\nOui ou non : ");
-			out.flush();
-			reponse = attendreReponse(new String[] {"oui", "non"});
-			if(reponse.equalsIgnoreCase("Oui")){
-				out.print("Choisissez le nom de votre table : ");
-				nomTable = attendreReponse();
-				serv.nouvelleTable(this, nomTable);
-			}else{
-				afficherTable();
-				ArrayList<String> nomTables = new ArrayList<>();
-				for(GestionTable gt : serv.getTables())
-					if(gt.getGcs().size()<8)
-						nomTables.add(gt.getNom());
-				String[] tabTables = new String[nomTables.size()];
-				nomTables.toArray(tabTables);
-				reponse = attendreReponse(tabTables);
-				for(GestionTable gt : serv.getTables())
-					if(gt.getNom().equalsIgnoreCase(reponse) && !gt.tableLancer)
-						gt.ajouterGc(this);
-			}
-		}
+            out.print("Voulez-vous créer une nouvelle table ?\nOui ou non : ");
+            out.flush();
+            reponse = attendreReponse(new String[]{"oui", "non"});
+            if (reponse.equalsIgnoreCase("Oui")) {
+                out.print("Choisissez le nom de votre table : ");
+                nomTable = attendreReponse();
+                serv.nouvelleTable(this, nomTable);
+            } else {
+                afficherTable();
+                ArrayList<String> nomTables = new ArrayList<>();
+                for (GestionTable gt : serv.getTables())
+                    if (gt.getGcs().size() < 8)
+                        nomTables.add(gt.getNom());
+                String[] tabTables = new String[nomTables.size()];
+                nomTables.toArray(tabTables);
+                reponse = attendreReponse(tabTables);
+                for (GestionTable gt : serv.getTables())
+                    if (gt.getNom().equalsIgnoreCase(reponse) && !gt.tableLancer)
+                        gt.ajouterGc(this);
+            }
+        }
 	}
 
 	String attendreReponse(){
 		String rep = null;
 
-		while(rep == null){
+		while(rep == null && toClient.isConnected()){
 			try{
 				rep = in.readLine();
-			}catch(IOException ignored){}
+                System.out.println(rep);
+			}catch(IOException ignored){System.out.println("Erreur cool");}
 		}
 		return rep;
 	}

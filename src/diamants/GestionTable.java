@@ -34,7 +34,15 @@ class GestionTable implements Runnable{
 		lancerTable();
 
 		while(rejouer){
+
 			for(int i = 0; i < 5; i++) {
+
+				deconnecte();
+
+				for(GestionClient gc : gcs){
+					System.out.println("Client n°" + gcs.indexOf(gc));
+				}
+
 				plateau = new ArrayList<>();
 				stockDiamantsTmp = new int[gcs.size()];
 				nbDiamantPlateau = 0;
@@ -42,9 +50,8 @@ class GestionTable implements Runnable{
 				pioche = InitialiserPioche.initialisation();
 				nbRestant = gcs.size();
 
-				for(GestionClient gc : gcs) {
-					gc.ecrire("Vous commancez l'exploration du temple n°"+(i+1), true);
-				}
+
+				messagePourTous("Vous commancez l'exploration du temple n°"+(i+1), true);
 
 				while (nbRestant > 0) {
 					nbQuitteur = 0;
@@ -66,8 +73,7 @@ class GestionTable implements Runnable{
 					}
 					plateau.add(carte);
 
-					for (GestionClient gc : gcs)
-						gc.ecrire("Les cartes en jeu sont : " + listeCartes(plateau), true);
+					messagePourTous("Les cartes en jeu sont : " + listeCartes(plateau), true);
 
 					if(nbRestant != 0) {
 
@@ -80,9 +86,10 @@ class GestionTable implements Runnable{
 
 						ArrayList<GestionClient> gcsEnJeu = new ArrayList<>();
 						for (GestionClient gc : gcs) {
-							if(!gc.quitter) {
+							if(!gc.quitter && !deconnecte()) {
 								gc.ecrire("Voulez-vous rester ou quitter : ", false);
-								gcsEnJeu.add(gc);
+								if(!deconnecte())
+    								gcsEnJeu.add(gc);
 							}
 						}
 						ArrayList<Boolean> rester = attendreResterOuQuitter(gcsEnJeu);
@@ -132,7 +139,29 @@ class GestionTable implements Runnable{
 		}
 	}
 
-	private ArrayList<Boolean> attendreResterOuQuitter(ArrayList<GestionClient> gcsEnJeu) {
+    private boolean deconnecte() {
+		for(GestionClient gc : gcs){
+			//System.out.println("Gc num : " + gcs.indexOf(gc) + "\n\tConnected : " + gc.toClient.isConnected() + "\n\tClosed : " + gc.toClient.isClosed());
+			try {
+				if(!gc.toClient.getInetAddress().isReachable(500)){
+					gcs.remove(gc);
+					messagePourTous(gc.name + " s'est déconnecté", true);
+					return true;
+				}
+			} catch (IOException e) {
+			}
+		}
+
+	    return false;
+    }
+
+    private void messagePourTous(String message, boolean retourLigne) {
+        for(GestionClient gc : gcs){
+            gc.ecrire(message,retourLigne);
+        }
+	}
+
+    private ArrayList<Boolean> attendreResterOuQuitter(ArrayList<GestionClient> gcsEnJeu) {
 		ArrayList<Boolean> rester = new ArrayList<>();
 		for(int i = 0; i < gcsEnJeu.size(); ++i) {
 			rester.add(null);
@@ -145,13 +174,15 @@ class GestionTable implements Runnable{
 			t.start();
 		}
 
-		while(rester.contains(null)) {
+		int timer = 0;
+		while(rester.contains(null) && timer < 200) {
 
 			for(ResterQuitter roq : roqs) {
 				if(roq.rester != null) rester.set(roqs.indexOf(roq), roq.rester);
 			}
 			try {
 				Thread.sleep(100);
+				++timer;
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -169,6 +200,11 @@ class GestionTable implements Runnable{
 			}
 
 			 */
+		}
+		if(rester.contains(null)) {
+			for(ResterQuitter roq : roqs) {
+				if(roq.rester == null) rester.set(roqs.indexOf(roq), false);
+			}
 		}
 		return rester;
 	}

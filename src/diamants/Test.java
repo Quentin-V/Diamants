@@ -1,7 +1,7 @@
 package diamants;
 
 public class Test{
-	public Test() {
+	private Test() {
 		Serveur serv = new Serveur();
 	}
 

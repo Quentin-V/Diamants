@@ -24,10 +24,10 @@ class Serveur {
 				Thread tgdc =  new Thread(gdc);
 				// lancer la thread qui gérera ce client
 				tgdc.start();
-				//Le client ce déconnecte
-				fin();
 			}
 		}catch(Exception e){System.out.println("Client pas cool"); e.printStackTrace();}
+
+
 	}
 
 
@@ -46,7 +46,6 @@ class Serveur {
 		return false;
 	}
 
-	void fin(){}
 
 	public static void main(String[] args) { // TEST TODO
 		new Serveur();
