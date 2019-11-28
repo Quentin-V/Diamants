@@ -13,7 +13,7 @@ class Serveur {
 		try{
 			alGestionClient = new ArrayList<GestionClient>();
 			alGestionTable  = new ArrayList<GestionTable>();
-			ServerSocket serverSocket = new ServerSocket(6000);
+			ServerSocket serverSocket = new ServerSocket(8000);
 			while (true){ // on boucle
 				// attendre patiemment un client
 				Socket toClient  = serverSocket.accept();

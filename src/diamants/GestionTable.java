@@ -51,7 +51,7 @@ class GestionTable implements Runnable{
 				nbRestant = gcs.size();
 
 
-				messagePourTous("Vous commancez l'exploration du temple n°"+(i+1), true);
+				messagePourTous("Vous commencez l'exploration du temple n°"+(i+1), true);
 
 				while (nbRestant > 0) {
 					nbQuitteur = 0;
@@ -101,7 +101,7 @@ class GestionTable implements Runnable{
 							}
 						}
 						for(GestionClient gc :gcs){
-							if(gc.quitter && !gc.quittezPlusTours){
+							if(gc.quitter && !gc.quitterPlusTours){
 								gc.ajouterDiamants(stockDiamantsTmp[gcs.indexOf(gc)] + nbDiamantPlateau/nbQuitteur);
 								stockDiamantsTmp[gcs.indexOf(gc)] = 0;
 								if(nbQuitteur == 1){
@@ -113,7 +113,7 @@ class GestionTable implements Runnable{
 												gc.ajouterDiamants(10);
 									}
 								}
-								gc.quittezPlusTours();
+								gc.quitterPlusTours();
 							}
 
 							if(nbQuitteur != 0)
@@ -149,6 +149,7 @@ class GestionTable implements Runnable{
 					return true;
 				}
 			} catch (IOException e) {
+
 			}
 		}
 

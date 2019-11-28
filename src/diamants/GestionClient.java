@@ -16,7 +16,7 @@ class GestionClient implements Runnable {
 	private int    nbDiamants;
 
 	boolean quitter;
-	boolean quittezPlusTours;
+	boolean quitterPlusTours;
 
 	private Serveur serv;
 
@@ -26,7 +26,7 @@ class GestionClient implements Runnable {
 	GestionClient(Socket s, Serveur serv){
 		this.serv = serv;
 		quitter = false;
-		quittezPlusTours = false;
+		quitterPlusTours = false;
 		name = "";
 		toClient = s;
 		try{
@@ -116,8 +116,8 @@ class GestionClient implements Runnable {
         quitter = true;
     }
 	
-	void quittezPlusTours() {
-		quittezPlusTours = true;
+	void quitterPlusTours() {
+		quitterPlusTours = true;
 	}
 
     void nouvellePartie(){
@@ -127,7 +127,7 @@ class GestionClient implements Runnable {
 
     void nouvelleManche(){
 	    quitter = false;
-		quittezPlusTours = false;
+		quitterPlusTours = false;
     }
 	
 	private boolean contient(String[] attendu, String s) {
