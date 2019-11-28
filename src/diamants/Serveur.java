@@ -13,7 +13,7 @@ class Serveur {
 		try{
 			alGestionClient = new ArrayList<GestionClient>();
 			alGestionTable  = new ArrayList<GestionTable>();
-			ServerSocket serverSocket = new ServerSocket(8000);
+			ServerSocket serverSocket = new ServerSocket(6000);
 			while (true){ // on boucle
 				// attendre patiemment un client
 				Socket toClient  = serverSocket.accept();
@@ -24,10 +24,10 @@ class Serveur {
 				Thread tgdc =  new Thread(gdc);
 				// lancer la thread qui gérera ce client
 				tgdc.start();
+				//Le client ce déconnecte
+				fin();
 			}
 		}catch(Exception e){System.out.println("Client pas cool"); e.printStackTrace();}
-
-
 	}
 
 
@@ -46,6 +46,7 @@ class Serveur {
 		return false;
 	}
 
+	void fin(){}
 
 	public static void main(String[] args) { // TEST TODO
 		new Serveur();
