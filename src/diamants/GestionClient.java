@@ -33,11 +33,25 @@ class GestionClient implements Runnable {
 
 	public void run(){
 		String reponse, nomTable;
+		boolean dejaExistante = false;
 		if(!serv.tableLibre()) {
 			out.print("Aucun table n'existe, vous êtes donc sur une nouvelle table." +
 					  "\nDonner un nom a cette table : ");
 			out.flush();
 			reponse = attendreReponse();
+			for(GestionTable gt : serv.getTables())
+				if(gt.getNom().equals(reponse))
+					dejaExistante = true;
+			while(dejaExistante) {
+				out.print("Ce nom est déjà utilisé, donner un autre nom a cette table : ");
+				out.flush();
+				reponse = attendreReponse();
+				for(GestionTable gt : serv.getTables())
+					if(gt.getNom().equals(reponse))
+						dejaExistante = true;
+					else
+						dejaExistante = false;
+			}
 			serv.nouvelleTable(this, reponse);
 		}else {
 			out.print("Voulez-vous créer une nouvelle table ?\nOui ou non : ");
@@ -45,7 +59,21 @@ class GestionClient implements Runnable {
 			reponse = attendreReponse(new String[] {"oui", "non"});
 			if(reponse.equalsIgnoreCase("Oui")){
 				out.print("Choisissez le nom de votre table : ");
+				out.flush();
 				nomTable = attendreReponse();
+				for(GestionTable gt : serv.getTables())
+					if(gt.getNom().equals(nomTable))
+						dejaExistante = true;
+				while(dejaExistante) {
+					out.print("Ce nom est déjà utilisé, donner un autre nom a cette table : ");
+					out.flush();
+					nomTable = attendreReponse();
+					for(GestionTable gt : serv.getTables())
+						if(gt.getNom().equals(nomTable))
+							dejaExistante = true;
+						else
+							dejaExistante = false;
+				}
 				serv.nouvelleTable(this, nomTable);
 			}else{
 				afficherTable();
