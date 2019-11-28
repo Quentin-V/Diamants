@@ -13,7 +13,7 @@ class Serveur {
 		try{
 			alGestionClient = new ArrayList<GestionClient>();
 			alGestionTable  = new ArrayList<GestionTable>();
-			ServerSocket serverSocket = new ServerSocket(6000);
+			ServerSocket serverSocket = new ServerSocket(8000);
 			while (true){ // on boucle
 				// attendre patiemment un client
 				Socket toClient  = serverSocket.accept();
@@ -24,8 +24,6 @@ class Serveur {
 				Thread tgdc =  new Thread(gdc);
 				// lancer la thread qui gérera ce client
 				tgdc.start();
-				//Le client ce déconnecte
-				fin();
 			}
 		}catch(Exception e){System.out.println("Client pas cool"); e.printStackTrace();}
 	}
@@ -46,17 +44,17 @@ class Serveur {
 		return false;
 	}
 
-	void fin(){}
-
 	public static void main(String[] args) { // TEST TODO
 		new Serveur();
 	}
 
-	public void ecrire(String test) {
-		System.out.println("Il est parti");
-	}
-
-	public void deconnexion(GestionClient gestionClient) {
-		// TODO
+	void deconnexion(GestionClient gestionClient) {
+		for(GestionTable gt : alGestionTable) {
+			if(gt.gcs.contains(gestionClient)) {
+				gt.gcs.remove(gestionClient);
+				gt.messagePourTous("Le joueur : " + gestionClient.name + " s'est deconnecté", true);
+			}
+		}
+		gestionClient = null;
 	}
 }

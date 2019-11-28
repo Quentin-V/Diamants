@@ -156,24 +156,10 @@ class GestionTable implements Runnable{
 	    System.out.println(gcs);
 
 		 */
-		try {
-			ObjectOutputStream oos = new ObjectOutputStream(gc.toClient.getOutputStream());
-			oos.writeObject(new Test());
-			oos.flush();
-			oos.close();
-		}catch(Exception e) {
-			System.out.println("IL EST DECO");
-			e.printStackTrace();
-		}
-
 	    return false;
     }
 
-    private class Test implements Serializable {
-		public Test() {}
-    }
-
-    private void messagePourTous(String message, boolean retourLigne) {
+    void messagePourTous(String message, boolean retourLigne) {
         for(GestionClient gc : gcs){
             gc.ecrire(message,retourLigne);
         }

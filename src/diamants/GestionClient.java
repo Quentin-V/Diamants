@@ -94,6 +94,8 @@ class GestionClient implements Runnable {
 				}
 			}catch(ClientDecoException cde) {
 				serv.deconnexion(this);
+				Thread.currentThread().interrupt();
+				break;
 			}catch(IllegalArgumentException iae) {
 				String envoiException = "Votre réponse doit être parmi les suivantes : ";
 				for(String r : attendu) envoiException += r + ", ";
@@ -103,6 +105,7 @@ class GestionClient implements Runnable {
 		}
 		return rep;
 	}
+
 
 	void ecrire(String message, boolean retourLigne){
 		if(retourLigne) {

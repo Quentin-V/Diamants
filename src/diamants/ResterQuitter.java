@@ -12,6 +12,10 @@ public class ResterQuitter implements Runnable {
 
 	@Override
 	public void run() {
-		rester = gc.attendreReponse(new String[] {"rester", "quitter"}).equals("rester");
+		String rep = gc.attendreReponse(new String[] {"rester", "quitter"});
+		if(rep != null)
+			rester = rep.equals("rester");
+		else
+			rester = false;
 	}
 }
