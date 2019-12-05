@@ -39,7 +39,7 @@ class Serveur {
 
 	boolean tableLibre(){
 		for(GestionTable gt : alGestionTable)
-			if(gt.getGcs().size() < 8)
+			if(gt.getGcs().size() < 8 && !gt.tableLancer)
 				return true;
 		return false;
 	}
@@ -52,7 +52,7 @@ class Serveur {
 		for(GestionTable gt : alGestionTable) {
 			if(gt.gcs.contains(gestionClient)) {
 				gt.gcs.remove(gestionClient);
-				gt.messagePourTous("Le joueur : " + gestionClient.name + " s'est deconnecté", true);
+				gt.messagePourTous(gestionClient.name + " s'est deconnecté", true);
 			}
 		}
 		gestionClient = null;

@@ -32,21 +32,23 @@ class GestionClient implements Runnable {
 		try{
 			out = new PrintWriter(s.getOutputStream(), true);
 			in  = new BufferedReader( new InputStreamReader(s.getInputStream()) );
-		}catch(Exception e){}
+		}catch(Exception ignored){}
 	}
 
 
 	public void run(){
+
+		ecrire("Bonjour joueur, quel est ton nom ? ", false);
+		this.name = attendreReponse();
+
 		String reponse, nomTable;
 		if (!serv.tableLibre()) {
-			out.print("Aucun table n'existe, vous êtes donc sur une nouvelle table." +
-				   "\nDonner un nom a cette table : ");
-			out.flush();
+			ecrire("Aucun table n'existe, vous êtes donc sur une nouvelle table." +
+				   "\nDonner un nom a cette table : ", false);
 			reponse = attendreReponse();
 			serv.nouvelleTable(this, reponse);
 		} else {
-			out.print("Voulez-vous créer une nouvelle table ?\nOui ou non : ");
-			out.flush();
+			ecrire("Voulez-vous créer une nouvelle table ?\nOui ou non : ", false);
 			reponse = attendreReponse(new String[]{"oui", "non"});
 			if (reponse.equalsIgnoreCase("Oui")) {
 				out.print("Choisissez le nom de votre table : ");

@@ -1,11 +1,6 @@
 package diamants;
 
-import javax.security.sasl.SaslServer;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 
 class GestionTable implements Runnable{
 
@@ -43,7 +38,6 @@ class GestionTable implements Runnable{
 
 				for(GestionClient gc : gcs){
 					System.out.println("Client n°" + gcs.indexOf(gc));
-					deconnecte(gc);
 				}
 
 				plateau = new ArrayList<>();
@@ -89,8 +83,7 @@ class GestionTable implements Runnable{
 
 						ArrayList<GestionClient> gcsEnJeu = new ArrayList<>();
 						for (GestionClient gc : gcs) {
-							System.out.println("Check deco");
-							if(!gc.quitter & !deconnecte(gc)) {
+							if(!gc.quitter) {
 								gc.ecrire("Voulez-vous rester ou quitter : ", false);
 								gcsEnJeu.add(gc);
 							}
@@ -142,24 +135,7 @@ class GestionTable implements Runnable{
 		}
 	}
 
-    private boolean deconnecte(GestionClient gc) {
-		/*
-	    System.out.print("LES GCS AVANT DECO : ");
-	    System.out.println(gcs);
-		System.out.println("Gc num : " + gcs.indexOf(gc) + "\n\tConnected : " + gc.toClient.isConnected() + "\n\tClosed : " + gc.toClient.isClosed() + "\n\tInputShutdown : " + gc.toClient.isInputShutdown() + "\n\tOututShutdown : " + gc.toClient.isOutputShutdown());
-		if (!gc.toClient.isConnected()) {
-			gcs.remove(gc);
-			messagePourTous(gc.name + " s'est déconnecté", true);
-			return true;
-		}
-	    System.out.print("LES GCS APRES DECO : ");
-	    System.out.println(gcs);
-
-		 */
-	    return false;
-    }
-
-    void messagePourTous(String message, boolean retourLigne) {
+	void messagePourTous(String message, boolean retourLigne) {
         for(GestionClient gc : gcs){
             gc.ecrire(message,retourLigne);
         }

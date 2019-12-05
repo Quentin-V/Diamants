@@ -36,7 +36,7 @@ abstract class InitialiserPioche {
 
 	/**
 	 * Méthode de mélange de la pioche.
-	 * @param pioche
+	 * @param pioche liste de cartes
 	 * @return Pioche donnée en paramètre mélangée
 	 */
 	private static ArrayList<Carte> melanger(ArrayList<Carte> pioche) {
@@ -45,7 +45,6 @@ abstract class InitialiserPioche {
 		for(int i = 0; i < pioche.size(); i++) { // On prend au hasard des cartes de la pioche donnée et on let met dans la nouvzlle pioche
 			piocheMelangee.add(pioche.remove((int) (Math.random() * pioche.size())));
 		}
-
 		return piocheMelangee;
 	}
 

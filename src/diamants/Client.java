@@ -15,7 +15,7 @@ class Client {
 	private PrintWriter		out;
 
 	/**
-	 * @param s
+	 * @param s Le socket de connexion au serveur
 	 */
 	public Client(Socket s) {
 		this.pochetTmp		= 0;
@@ -26,7 +26,7 @@ class Client {
 			this.in		= new BufferedReader(new InputStreamReader(s.getInputStream()));
 		}
 		catch(IOException ie) {
-			System.out.println(ie);
+			ie.printStackTrace();
 		}
 	}
 
