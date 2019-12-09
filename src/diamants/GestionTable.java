@@ -7,7 +7,7 @@ class GestionTable implements Runnable{
 	final int MINIMUM_JOUEUR = 1;
 
 	ArrayList<GestionClient> gcs;
-	String nom;
+	private String nom;
 	boolean tableLancer = false;
 
 	GestionTable(GestionClient gc, String nomTable){
@@ -78,7 +78,7 @@ class GestionTable implements Runnable{
 							gc1.ecrire("Nombre de diamants sur le plateau : " + nbDiamantPlateau, true);
 							gc1.ecrire("Nombre de diamants en cours : ", true);
 							for (int u = 0; u<gcs.size();u++)
-								gc1.ecrire("\t" + u + " : " + stockDiamantsTmp[u], true);
+								gc1.ecrire(String.format("\t%20s : %2d", gcs.get(u).name, stockDiamantsTmp[u]), true);
 						}
 
 						ArrayList<GestionClient> gcsEnJeu = new ArrayList<>();
@@ -126,7 +126,11 @@ class GestionTable implements Runnable{
 					gc.nouvelleManche();
 			}
 			tableLancer = false;
-			gcs.get(0).ecrire("Voulez-vous rejouer ?", true);
+			try {
+				gcs.get(0).ecrire("Voulez-vous rejouer ?", true);
+			} catch (Exception e) {
+				break;
+			}
 			rep = gcs.get(0).attendreReponse(new String[] {"oui", "non"});
 			tableLancer = true;
 			rejouer = rep.equalsIgnoreCase("oui");
@@ -206,7 +210,7 @@ class GestionTable implements Runnable{
 		gcs.add(gc);
 		for(GestionClient unGc : gcs) {
 			if(unGc != gc) {
-				unGc.ecrire("Un joueur s'est connecté !", true);
+				unGc.ecrire(unGc.name + " s'est connecté !", true);
 			}else {
 				unGc.ecrire("Vous êtes connecté à la table : " + this.nom, true);
 			}

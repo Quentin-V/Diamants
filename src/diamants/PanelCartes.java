@@ -2,6 +2,7 @@ package diamants;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -21,11 +22,17 @@ class PanelCartes extends JPanel {
 		for(Carte c : this.cartes) {
 			try {
 				if(c instanceof CarteDanger) {
-					this.add(new JLabel(new ImageIcon(ImageIO.read(getClass().getResource("/"+((CarteDanger) c).danger+".png")))));
+					ImageIcon image = new ImageIcon(ImageIO.read(getClass().getResource("/"+((CarteDanger) c).danger+".png")));
+					image = new ImageIcon(image.getImage().getScaledInstance(120, 200, Image.SCALE_DEFAULT));
+					this.add(new JLabel(image));
 				}else if(c instanceof CarteTresor) {
-					this.add(new JLabel(new ImageIcon(ImageIO.read(getClass().getResource("/diam"+((CarteTresor) c).nbDiamants+".png")))));
+					ImageIcon image = new ImageIcon(ImageIO.read(getClass().getResource("/diam"+((CarteTresor) c).nbDiamants+".png")));
+				     image = new ImageIcon(image.getImage().getScaledInstance(120, 200, Image.SCALE_DEFAULT));
+					this.add(new JLabel(image));
 				}else if(c instanceof CarteArtefact) {
-					this.add(new JLabel(new ImageIcon(ImageIO.read(getClass().getResource("/arte"+((CarteArtefact) c).numArtefact+".png")))));
+					ImageIcon image = new ImageIcon(ImageIO.read(getClass().getResource("/arte"+((CarteArtefact) c).numArtefact+".png")));
+					image = new ImageIcon(image.getImage().getScaledInstance(120, 200, Image.SCALE_DEFAULT));
+					this.add(new JLabel(image));
 				}
 			} catch (IOException e) {
 				e.printStackTrace();

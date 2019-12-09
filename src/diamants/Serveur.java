@@ -15,6 +15,11 @@ class Serveur {
 			alGestionTable  = new ArrayList<GestionTable>();
 			ServerSocket serverSocket = new ServerSocket(8000);
 			while (true){ // on boucle
+
+				for(GestionTable gt : alGestionTable) {
+					if(gt.gcs.size() == 0) alGestionTable.remove(gt);
+				}
+
 				// attendre patiemment un client
 				Socket toClient  = serverSocket.accept();
 				// créer un GestionClient pour traiter ce nouveau client
