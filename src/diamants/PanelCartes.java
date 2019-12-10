@@ -14,10 +14,11 @@ class PanelCartes extends JPanel {
 	PanelCartes(ArrayList<Carte> cartes, FrameJeu frameJeu) {
 		this.frameJeu = frameJeu;
 		this.cartes = cartes;
-		refresh();
+		refresh(cartes);
 	}
 
-	void refresh() {
+	void refresh(ArrayList<Carte> plateau) {
+		this.cartes = plateau;
 		this.removeAll();
 		for(Carte c : this.cartes) {
 			try {

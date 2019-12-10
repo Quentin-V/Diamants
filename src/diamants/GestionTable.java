@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 class GestionTable implements Runnable{
 
-	final int MINIMUM_JOUEUR = 1;
+	private final int MINIMUM_JOUEUR = 1;
 
 	ArrayList<GestionClient> gcs;
 	private String nom;
@@ -23,7 +23,7 @@ class GestionTable implements Runnable{
 		int nbRestant;
 		boolean rejouer = true;
 		ArrayList<Carte> pioche;
-		ArrayList<Carte> plateau = new ArrayList<>();
+		ArrayList<Carte> plateau;
 		int[] stockDiamantsTmp;
 		int nbDiamantPlateau;
 		int nbQuitteur;
@@ -49,16 +49,28 @@ class GestionTable implements Runnable{
 
 
 				messagePourTous("Vous commencez l'exploration du temple n°"+(i+1), true);
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) { e.printStackTrace(); }
 
 				while (nbRestant > 0) {
 					nbQuitteur = 0;
 					carte = pioche.get((int) (Math.random() * pioche.size()));
+
 					switch (carte.type) {
 						case "Artefact":
 							++nbArtSorti;
 							break;
 						case "Danger":
-							if(checkDanger(plateau, ((CarteDanger)carte).danger))nbRestant = 0;
+							if(checkDanger(plateau, ((CarteDanger)carte).danger)) {
+								plateau.add(carte);
+								afficherInfos(plateau, nbDiamantPlateau, stockDiamantsTmp);
+								messagePourTous("Deux dangers de type " + ((CarteDanger)plateau.get(plateau.size()-1)).danger + " sont apparus, l'exploration se termine !", true);
+								try {
+									Thread.sleep(5000);
+								} catch (InterruptedException e) { e.printStackTrace(); }
+								nbRestant = 0;
+							}
 							break;
 						case "Tresor":
 							for (GestionClient gc : gcs)
@@ -68,18 +80,11 @@ class GestionTable implements Runnable{
 							break;
 
 					}
-					plateau.add(carte);
-
-					messagePourTous("Les cartes en jeu sont : " + listeCartes(plateau), true);
 
 					if(nbRestant != 0) {
 
-						for (GestionClient gc1 : gcs) {
-							gc1.ecrire("Nombre de diamants sur le plateau : " + nbDiamantPlateau, true);
-							gc1.ecrire("Nombre de diamants en cours : ", true);
-							for (int u = 0; u<gcs.size();u++)
-								gc1.ecrire(String.format("\t%20s : %2d", gcs.get(u).name, stockDiamantsTmp[u]), true);
-						}
+						plateau.add(carte);
+						afficherInfos(plateau, nbDiamantPlateau, stockDiamantsTmp);
 
 						ArrayList<GestionClient> gcsEnJeu = new ArrayList<>();
 						for (GestionClient gc : gcs) {
@@ -139,10 +144,28 @@ class GestionTable implements Runnable{
 		}
 	}
 
+	private void afficherInfos(ArrayList<Carte> plateau, int nbDiamantPlateau, int[] stockDiamantsTmp) {
+		effacerToutLeMonde();
+
+		messagePourTous("Les cartes en jeu sont : " + listeCartes(plateau), true);
+
+		for (GestionClient gc1 : gcs) {
+			gc1.ecrire("Nombre de diamants sur le plateau : " + nbDiamantPlateau, true);
+			gc1.ecrire("Nombre de diamants en cours : ", true);
+			for (int u = 0; u<gcs.size();u++)
+				gc1.ecrire(String.format("\t%20s : %2d", gcs.get(u).name, stockDiamantsTmp[u]), true);
+			gc1.ecrire("Vos diamants sauvegardés : " + gc1.nbDiamants, true);
+		}
+	}
+
 	void messagePourTous(String message, boolean retourLigne) {
         for(GestionClient gc : gcs){
             gc.ecrire(message,retourLigne);
         }
+	}
+
+	void effacerToutLeMonde() {
+		messagePourTous("\033[H\033[2J", false);
 	}
 
     private ArrayList<Boolean> attendreResterOuQuitter(ArrayList<GestionClient> gcsEnJeu) {
@@ -160,7 +183,6 @@ class GestionTable implements Runnable{
 
 		int timer = 0;
 		while(rester.contains(null) && timer < 200) {
-
 			for(ResterQuitter roq : roqs) {
 				if(roq.rester != null) rester.set(roqs.indexOf(roq), roq.rester);
 			}
@@ -169,6 +191,9 @@ class GestionTable implements Runnable{
 				++timer;
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+			}
+			if(timer % 10 == 0 && timer >= 160) {
+				messagePourTous( (20-(timer/10)) + "...", true);
 			}
 		}
 		if(rester.contains(null)) {
@@ -191,8 +216,10 @@ class GestionTable implements Runnable{
 	}
 
 	private boolean checkDanger(ArrayList<Carte> plateau, String danger) {
-		for(Carte c : plateau)
-			if(c instanceof CarteDanger && ((CarteDanger) c).danger.equals(danger)) return true;
+		for(Carte c : plateau) {
+			if(c instanceof CarteDanger && ((CarteDanger) c).danger.equals(danger))
+				return true;
+		}
 		return false;
 	}
 

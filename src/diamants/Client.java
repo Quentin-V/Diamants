@@ -1,11 +1,10 @@
 package diamants;
 
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import javax.swing.*;
+import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 
 class Client {
 	private int				pochetTmp;
@@ -13,20 +12,66 @@ class Client {
 	private boolean			sortit;
 	private BufferedReader	in;
 	private PrintWriter		out;
+	private Socket           socket;
+	private Diamants         diamants;
+
 
 	/**
 	 * @param s Le socket de connexion au serveur
 	 */
-	public Client(Socket s) {
-		this.pochetTmp		= 0;
-		this.pochetSauvee	= 0;
-		this.sortit			= false;
+	Client(Socket s, Diamants diamants) {
+		this.pochetTmp    = 0;
+		this.pochetSauvee = 0;
+		this.sortit       = false;
+		this.socket       = s;
+		this.diamants     = diamants;
 		try {
-			this.out	= new PrintWriter(s.getOutputStream(), true);
-			this.in		= new BufferedReader(new InputStreamReader(s.getInputStream()));
+			this.out = new PrintWriter(s.getOutputStream(), true);
+			this.in  = new BufferedReader(new InputStreamReader(s.getInputStream()));
 		}
 		catch(IOException ie) {
 			ie.printStackTrace();
+		}
+		Listener listener = new Listener(this);
+		Thread t = new Thread(listener);
+		t.start();
+	}
+
+	private class Listener implements Runnable {
+		Client client;
+		Listener(Client client) {
+			this.client = client;
+		}
+
+		@Override
+		public void run() {
+			try {
+				String s = in.readLine();
+				System.out.println(s);
+				if (s.equals("plateau")) {
+					listenPlateau();
+				}else if (s.equals("Bonjour joueur, quel est ton nom ? ")) {
+					new FrameDemande("Quel est votre nom", client);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		private void listenPlateau() {
+			try {
+				ObjectInputStream ois = new ObjectInputStream(this.client.socket.getInputStream());
+				byte b = -1;
+				while(b == -1) {
+					try {
+						Object recu = ois.readObject();
+						this.client.diamants.frJeu.pnlCartes.refresh((ArrayList<Carte>) recu);
+						b = 0;
+					}catch(Exception ignored) {}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -49,6 +94,10 @@ class Client {
 		return "" + this.sortit;
 	}
 
+
+	void envoyer(String message) {
+		out.println(message);
+	}
 
 	/**
 	 * @param repPossible sont les differentes reponses que peut choisir le joueur

@@ -8,16 +8,19 @@ import java.net.Socket;
 
 class Diamants {
 
-	//private FrameJeu frJeu;
-	//private Client client;
+	FrameJeu frJeu;
+	Client client;
 
 	private Diamants() {
 		new Launcher(this);
 	}
 
 	private void lancer(Socket s) {
-		/*this.frJeu = */new FrameJeu(this);
-		/*this.client = */new Client(s);
+		this.client = new Client(s, this);
+	}
+
+	private void creerFrameJeu() {
+		this.frJeu = new FrameJeu(this);
 	}
 
 	public static void main(String[] args) {
@@ -38,6 +41,8 @@ class Diamants {
 			this.setLocation(400, 300);
 			this.setSize(365, 215);
 			this.setLayout(null);
+
+			this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 			JLabel lblAdresseIp = new JLabel();
 			lblAdresseIp.setBounds(26, 24, 70, 20);

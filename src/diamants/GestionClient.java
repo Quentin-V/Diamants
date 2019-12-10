@@ -1,9 +1,6 @@
 package diamants;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -13,7 +10,7 @@ class GestionClient implements Runnable {
 	PrintWriter out;
 
 	String name;
-	private int    nbDiamants;
+	int    nbDiamants;
 
 	boolean quitter;
 	boolean quitterPlusTours;
@@ -37,7 +34,6 @@ class GestionClient implements Runnable {
 
 
 	public void run(){
-
 		ecrire("Bonjour joueur, quel est ton nom ? ", false);
 		this.name = attendreReponse();
 
@@ -77,7 +73,7 @@ class GestionClient implements Runnable {
 			try{
 				rep = in.readLine();
                 System.out.println(rep);
-			}catch(IOException ignored){System.out.println("Erreur cool");}
+			}catch(IOException ignored){}
 		}
 		return rep;
 	}
@@ -159,4 +155,23 @@ class GestionClient implements Runnable {
 		return nbDiamants;
 	}
 
+	void envoyerPlateau(ArrayList<Carte> plateau) {
+		ObjectOutputStream oos = null;
+		try {
+			oos = new ObjectOutputStream(this.toClient.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		out.println("plateau");
+		try {
+			Thread.sleep(50);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		try {
+			oos.writeObject(plateau);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
