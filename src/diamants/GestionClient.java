@@ -36,7 +36,12 @@ class GestionClient implements Runnable {
 	public void run(){
 		ecrire("Bonjour joueur, quel est ton nom ? ", false);
 		this.name = attendreReponse();
+		if(this.name != null) {
+			selectionnTable();
+		}
+	}
 
+	private void selectionnTable() {
 		String reponse, nomTable;
 		if (!serv.tableLibre()) {
 			ecrire("Aucun table n'existe, vous êtes donc sur une nouvelle table." +
@@ -47,7 +52,7 @@ class GestionClient implements Runnable {
 			ecrire("Voulez-vous créer une nouvelle table ?\nOui ou non : ", false);
 			reponse = attendreReponse(new String[]{"oui", "non"});
 			if (reponse.equalsIgnoreCase("Oui")) {
-				out.print("Choisissez le nom de votre table : ");
+				ecrire("Choisissez le nom de votre table : ", false);
 				nomTable = attendreReponse();
 				serv.nouvelleTable(this, nomTable);
 			} else {
@@ -67,14 +72,15 @@ class GestionClient implements Runnable {
 	}
 
 	String attendreReponse(){
-		String rep = null;
-
-		while(rep == null && toClient.isConnected()){
-			try{
-				rep = in.readLine();
-                System.out.println(rep);
-			}catch(IOException ignored){}
-		}
+		String rep = "";
+		try {
+			while(rep.equals("") && toClient.isConnected()){
+				try{
+					rep = in.readLine();
+					System.out.println(rep); // DEBUG
+				}catch(IOException ignored){}
+			}
+		}catch(NullPointerException npe) {this.serv.deconnexion(this);}
 		return rep;
 	}
 
@@ -106,10 +112,14 @@ class GestionClient implements Runnable {
 
 
 	void ecrire(String message, boolean retourLigne){
+		//System.out.println("Envoyé : " + message); // DEBUG
 		if(retourLigne) {
 			out.println(message);
+			out.print("");
+			out.flush();
 		} else {
 			out.print(message);
+			out.print("");
 			out.flush();
 		}
 	}

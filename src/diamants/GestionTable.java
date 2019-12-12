@@ -47,7 +47,7 @@ class GestionTable implements Runnable{
 				pioche = InitialiserPioche.initialisation();
 				nbRestant = gcs.size();
 
-
+				effacerToutLeMonde();
 				messagePourTous("Vous commencez l'exploration du temple n°"+(i+1), true);
 				try {
 					Thread.sleep(1000);
@@ -123,13 +123,40 @@ class GestionTable implements Runnable{
 
 					}
 				}
-				for (GestionClient gc1 : gcs)
-					for (int u = 0; u<gcs.size();u++)
-						gc1.ecrire("Le nombre de diamants du joueur " + u + " à son campement est de " + gcs.get(u).diamants(), true);
 
 				for (GestionClient gc : gcs)
 					gc.nouvelleManche();
 			}
+			int maxDiam = 0;
+			ArrayList<GestionClient> gagnants = new ArrayList<>();
+
+			//Trouver le/les gagnants
+			for(GestionClient joueur : gcs) {
+				if(joueur.nbDiamants > maxDiam) {
+					gagnants.clear();
+					gagnants.add(joueur);
+					maxDiam = joueur.nbDiamants;
+				}else if(joueur.nbDiamants == maxDiam) {
+					gagnants.add(joueur);
+				}
+			}
+
+			if(gagnants.size() == 1) {
+				messagePourTous("Le gagnant est : " + gagnants.get(0).name + " avec " + gagnants.get(0).nbDiamants + " diamants.", true);
+			}else {
+				messagePourTous("Les gagnants sont : ", true);
+				for(GestionClient gagnant : gagnants) {
+					messagePourTous("\t" + gagnant.name + "avec " + gagnant.nbDiamants + " diamants.", true);
+				}
+			}
+
+			for (GestionClient gc1 : gcs) {
+				messagePourTous("Infos de la partie : ", true);
+				for (GestionClient gc : gcs)
+					gc1.ecrire("\t" + gc.name + " a " + gc.nbDiamants + " diamants à son campement", true);
+			}
+
+
 			tableLancer = false;
 			try {
 				gcs.get(0).ecrire("Voulez-vous rejouer ?", true);
@@ -235,13 +262,14 @@ class GestionTable implements Runnable{
 	ArrayList<GestionClient> getGcs() { return gcs; }
 	void ajouterGc(GestionClient gc) {
 		gcs.add(gc);
-		for(GestionClient unGc : gcs) {
-			if(unGc != gc) {
-				unGc.ecrire(unGc.name + " s'est connecté !", true);
-			}else {
-				unGc.ecrire("Vous êtes connecté à la table : " + this.nom, true);
-			}
-		}
+		messagePourTousLesAutresQue(gc, gc.name + " s'est connecté !", true);
+		gc.ecrire("Vous êtes connecté à la table : " + this.nom, true);
+	}
+
+	private void messagePourTousLesAutresQue(GestionClient gc, String message, boolean retourligne) {
+		for(GestionClient unGc : gcs)
+			if(unGc != gc)
+				unGc.ecrire(message, retourligne);
 	}
 
 }

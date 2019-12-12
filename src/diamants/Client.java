@@ -1,170 +1,126 @@
 package diamants;
 
-
-import javax.swing.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.net.UnknownHostException;
 
-class Client {
-	private int				pochetTmp;
-	private int				pochetSauvee;
-	private boolean			sortit;
-	private BufferedReader	in;
-	private PrintWriter		out;
-	private Socket           socket;
-	private Diamants         diamants;
+public class Client {
 
+	Client() {
+		String ip = null;
+		while(ip == null) {
+			System.out.print("Adresse IP : ");
+			try {
+				ip = attendreReponse();
+				InetAddress.getByName(ip);
+				/*if(!ip.matches("([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})|([A-Za-z0-9]+(\\.[A-Za-z]+)+)")) {
+					throw new IllegalArgumentException();
+				}*/
+			}catch(IllegalArgumentException | UnknownHostException iae) {System.out.println("Adresse invalide.");}
+		}
+		String port = null;
+		while(port == null) {
+			System.out.print("Port : ");
+			try {
+				port = attendreReponse();
+				int iPort = Integer.parseInt(port);
+				if(iPort < 0 || iPort > 65355) {
+					throw new IllegalArgumentException();
+				}
+			}catch(NumberFormatException nfe) {System.out.println("Port invalide.");}
+			 catch(IllegalArgumentException iae) {System.out.println("Le port doit être compris entre 0 et 65355.");}
+		}
 
-	/**
-	 * @param s Le socket de connexion au serveur
-	 */
-	Client(Socket s, Diamants diamants) {
-		this.pochetTmp    = 0;
-		this.pochetSauvee = 0;
-		this.sortit       = false;
-		this.socket       = s;
-		this.diamants     = diamants;
+		Socket toServer = null;
+		BufferedReader in = null;
+		PrintWriter out = null;
 		try {
-			this.out = new PrintWriter(s.getOutputStream(), true);
-			this.in  = new BufferedReader(new InputStreamReader(s.getInputStream()));
+			toServer = new Socket(ip, Integer.parseInt(port));
+			in = new BufferedReader(new InputStreamReader(toServer.getInputStream()));
+			out = new PrintWriter(toServer.getOutputStream(), true);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		catch(IOException ie) {
-			ie.printStackTrace();
-		}
-		Listener listener = new Listener(this);
+
+		Listener listener = new Listener(in);
 		Thread t = new Thread(listener);
 		t.start();
+		Writer writer = new Writer(out);
+		Thread t2 = new Thread(writer);
+		t2.start();
 	}
 
 	private class Listener implements Runnable {
-		Client client;
-		Listener(Client client) {
-			this.client = client;
+
+		BufferedReader in;
+		Listener(BufferedReader in) {
+			this.in = in;
 		}
 
 		@Override
 		public void run() {
-			try {
-				String s = in.readLine();
-				System.out.println(s);
-				if (s.equals("plateau")) {
-					listenPlateau();
-				}else if (s.equals("Bonjour joueur, quel est ton nom ? ")) {
-					new FrameDemande("Quel est votre nom", client);
+			String l;
+			while(true) {
+				try {
+					if ((l = in.readLine()) != null) {
+						System.out.println(l);
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-		private void listenPlateau() {
-			try {
-				ObjectInputStream ois = new ObjectInputStream(this.client.socket.getInputStream());
-				byte b = -1;
-				while(b == -1) {
-					try {
-						Object recu = ois.readObject();
-						this.client.diamants.frJeu.pnlCartes.refresh((ArrayList<Carte>) recu);
-						b = 0;
-					}catch(Exception ignored) {}
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		}
 	}
 
-	/**
-	 * @return la reponse de si le joueur veut retourner au campement
-	 */
-	String demandeSortit() {
-		this.out.println("Voulez-vous rentrez au campement ? (O/N)");
+	private class Writer implements Runnable {
 
-		switch(demande(new String[]{"O","N"}, "Voulez-vous rentrez au campement ? (O/N)"))
-		{
-			case "O" :
-				this.sortit = true;
-				break;
-			case "N" :
-				this.sortit = false;
-				break;
+		PrintWriter out;
+		BufferedReader sysIn;
+		Writer(PrintWriter out) {
+			this.out = out;
+			this.sysIn = new BufferedReader(new InputStreamReader(System.in));
 		}
 
-		return "" + this.sortit;
-	}
-
-
-	void envoyer(String message) {
-		out.println(message);
-	}
-
-	/**
-	 * @param repPossible sont les differentes reponses que peut choisir le joueur
-	 * @param question a laquelle le joueur doit repondre
-	 * @return la reponse du joueur
-	 */
-	private String demande(String[] repPossible, String question) {
-		String rep = "";
-		boolean sortBoucle = false;
-		while(!sortBoucle) {
-			this.out.println(question);
-			//rep = this.in.read();
-			for (int i = 0; i < repPossible.length; i++)
-				if (rep.equals(repPossible[i])) {
-					sortBoucle = true;
+		@Override
+		public void run() {
+			while(true) {
+				try {
+					this.out.println(this.sysIn.readLine());
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
+				try {
+					Thread.sleep(300);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	String attendreReponse() {
+		String rep = null;
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		while(rep == null){
+			try{
+				rep = in.readLine();
+				System.out.println(rep);
+			}catch(IOException ignored){}
 		}
 		return rep;
 	}
 
-	/**
-	 * @return true si le joueur est au campement
-	 */
-	boolean getSortit() {
-		return this.sortit;
+	public static void main(String[] args) {
+		new Client();
 	}
 
-	/**
-	 * @return le nombre de points que le joueur a et qu'il peut encore perdre
-	 */
-	int getPochetTmp() {
-		return this.pochetTmp;
-	}
-
-	/**
-	 * @return le nombre de points que le joueur a et qu'il ne peut pas perdre
-	 */
-	int getPochetSauvee() {
-		return this.pochetSauvee;
-	}
-
-	/**
-	 * @param nbRubis
-	 */
-	void ajouterRubis(int nbRubis) {
-		this.pochetTmp += nbRubis;
-	}
-
-	/**
-	 * @param nbDiamants
-	 */
-	void ajouterDiamants(int nbDiamants) {
-		this.pochetTmp += (nbDiamants * 5);
-	}
-
-	/**
-	 * Sauve les pierres que le joueur pouvait perdre
-	 */
-	void sauverPierresPrecieuses() {
-		this.pochetSauvee	+= this.pochetTmp;
-		this.pochetTmp 		=  0;
-	}
-
-	/**
-	 * Perd les pierres que le joueur pouvait perdre
-	 */
-	void perdrePierresPrecieuses() {
-		this.pochetTmp = 0;
-	}
 }

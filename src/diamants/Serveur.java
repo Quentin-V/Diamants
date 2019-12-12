@@ -22,6 +22,7 @@ class Serveur {
 
 				// attendre patiemment un client
 				Socket toClient  = serverSocket.accept();
+				System.out.println("Client connecté");
 				// créer un GestionClient pour traiter ce nouveau client
 				GestionClient gdc = new GestionClient(toClient, this);
 				alGestionClient.add(gdc);
