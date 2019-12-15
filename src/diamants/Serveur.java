@@ -3,22 +3,24 @@ package diamants;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 
 class Serveur {
 
 	private ArrayList<GestionClient> alGestionClient;
 	private ArrayList<GestionTable> alGestionTable;
 
-	Serveur(){
+	private Serveur(){
 		try{
 			alGestionClient = new ArrayList<GestionClient>();
 			alGestionTable  = new ArrayList<GestionTable>();
 			ServerSocket serverSocket = new ServerSocket(8000);
 			while (true){ // on boucle
-
-				for(GestionTable gt : alGestionTable) {
-					if(gt.gcs.size() == 0) alGestionTable.remove(gt);
-				}
+				try {
+					for(GestionTable gt : alGestionTable) { // Effacer les tables vides
+						if(gt.gcs.size() == 0) alGestionTable.remove(gt);
+					}
+				}catch(ConcurrentModificationException ignored) {}
 
 				// attendre patiemment un client
 				Socket toClient  = serverSocket.accept();
@@ -50,7 +52,7 @@ class Serveur {
 		return false;
 	}
 
-	public static void main(String[] args) { // TEST TODO
+	public static void main(String[] args) {
 		new Serveur();
 	}
 

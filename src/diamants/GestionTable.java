@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 class GestionTable implements Runnable{
 
-	private final int MINIMUM_JOUEUR = 1;
+	private final int MINIMUM_JOUEUR = 3;
 
 	ArrayList<GestionClient> gcs;
 	private String nom;
@@ -35,10 +35,6 @@ class GestionTable implements Runnable{
 		while(rejouer){
 
 			for(int i = 0; i < 5; i++) {
-
-				for(GestionClient gc : gcs){
-					System.out.println("Client n°" + gcs.indexOf(gc));
-				}
 
 				plateau = new ArrayList<>();
 				stockDiamantsTmp = new int[gcs.size()];
@@ -150,8 +146,8 @@ class GestionTable implements Runnable{
 				}
 			}
 
+			messagePourTous("Infos de la partie : ", true);
 			for (GestionClient gc1 : gcs) {
-				messagePourTous("Infos de la partie : ", true);
 				for (GestionClient gc : gcs)
 					gc1.ecrire("\t" + gc.name + " a " + gc.nbDiamants + " diamants à son campement", true);
 			}
@@ -169,6 +165,8 @@ class GestionTable implements Runnable{
 			for(GestionClient gc : gcs)
 				gc.nouvellePartie();
 		}
+		effacerToutLeMonde();
+		gcs.clear();
 	}
 
 	private void afficherInfos(ArrayList<Carte> plateau, int nbDiamantPlateau, int[] stockDiamantsTmp) {
@@ -191,7 +189,7 @@ class GestionTable implements Runnable{
         }
 	}
 
-	void effacerToutLeMonde() {
+	private void effacerToutLeMonde() {
 		messagePourTous("\033[H\033[2J", false);
 	}
 
